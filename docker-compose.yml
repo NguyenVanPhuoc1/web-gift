@@ -1,0 +1,46 @@
+version: "3"
+
+services:
+  workspace:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+    container_name: miduner_framework
+    working_dir: /var/www/html
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/var/www/html
+      - ./docker/nginx_log:/var/log/nginx
+      - ./docker/php-fpm/php-fpm.log:/var/log/php-fpm.log
+      - ./docker/config/app.conf:/etc/nginx/conf.d/app.conf
+      - ./storage:/var/www/html/storage
+    links:
+      - mysql
+      - phpmyadmin
+
+  mysql:
+    image: mysql:8.0.31
+    container_name: miduner_mysql
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./docker/mysql:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: laravel
+      MYSQL_USER: web_2025
+      MYSQL_PASSWORD: web_2025
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: miduner_phpmyadmin
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: web_2025
+      PMA_PASSWORD: web_2025
+    depends_on:
+      - mysql
